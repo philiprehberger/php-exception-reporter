@@ -1,0 +1,43 @@
+{
+    "name": "philiprehberger/php-exception-reporter",
+    "description": "Lightweight exception reporting to log channels and webhooks",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "exception",
+        "error",
+        "reporting",
+        "logging",
+        "webhook"
+    ],
+    "authors": [
+        {
+            "name": "Philip Rehberger"
+        }
+    ],
+    "require": {
+        "php": "^8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "laravel/pint": "^1.0",
+        "phpstan/phpstan": "^1.12|^2.0"
+    },
+    "suggest": {
+        "psr/log": "For PSR-3 log channel integration (^3.0)"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhilipRehberger\\ExceptionReporter\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PhilipRehberger\\ExceptionReporter\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable"
+}
