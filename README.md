@@ -1,8 +1,8 @@
 # PHP Exception Reporter
 
 [![Tests](https://github.com/philiprehberger/php-exception-reporter/actions/workflows/tests.yml/badge.svg)](https://github.com/philiprehberger/php-exception-reporter/actions/workflows/tests.yml)
-[![Latest Version](https://img.shields.io/packagist/v/philiprehberger/php-exception-reporter.svg)](https://packagist.org/packages/philiprehberger/php-exception-reporter)
-[![License](https://img.shields.io/packagist/l/philiprehberger/php-exception-reporter.svg)](LICENSE)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/philiprehberger/php-exception-reporter.svg)](https://packagist.org/packages/philiprehberger/php-exception-reporter)
+[![License](https://img.shields.io/github/license/philiprehberger/php-exception-reporter)](LICENSE)
 
 Lightweight exception reporting to log channels and webhooks.
 
@@ -134,7 +134,7 @@ class SlackChannel implements ReportChannel
 | `CallbackChannel` | Invokes a user-provided callable |
 | `FileChannel` | Appends JSON-encoded reports to a file |
 
-## Testing
+## Development
 
 ```bash
 composer install
@@ -145,4 +145,4 @@ vendor/bin/phpstan analyse
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT
