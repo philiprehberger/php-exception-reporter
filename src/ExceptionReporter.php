@@ -16,6 +16,14 @@ final class ExceptionReporter
 
     private bool $deduplication = false;
 
+    /** @var array<string, mixed> */
+    private array $persistentContext = [];
+
+    /** @var (callable(\Throwable): bool)|null */
+    private $filter = null;
+
+    private int $reportCount = 0;
+
     /**
      * Add a reporting channel.
      */
@@ -37,13 +45,51 @@ final class ExceptionReporter
     }
 
     /**
+     * Return a new reporter instance with persistent context fields merged in.
+     *
+     * @param  array<string, mixed>  $context
+     */
+    public function withContext(array $context): self
+    {
+        $clone = clone $this;
+        $clone->persistentContext = array_merge($this->persistentContext, $context);
+
+        return $clone;
+    }
+
+    /**
+     * Set a filter callable — if it returns false, the exception is not reported.
+     *
+     * @param  callable(\Throwable): bool  $filter
+     */
+    public function setFilter(callable $filter): self
+    {
+        $this->filter = $filter;
+
+        return $this;
+    }
+
+    /**
+     * Return the number of exceptions reported by this instance.
+     */
+    public function count(): int
+    {
+        return $this->reportCount;
+    }
+
+    /**
      * Capture and report an exception to all channels.
      *
      * @param  array<string, mixed>  $context  Additional context to include
      */
     public function capture(\Throwable $exception, array $context = []): ExceptionReport
     {
-        $report = ExceptionReport::fromThrowable($exception, $context);
+        $mergedContext = array_merge($this->persistentContext, $context);
+        $report = ExceptionReport::fromThrowable($exception, $mergedContext);
+
+        if ($this->filter !== null && ($this->filter)($exception) === false) {
+            return $report;
+        }
 
         if ($this->deduplication) {
             $fingerprint = $report->fingerprint();
@@ -60,6 +106,8 @@ final class ExceptionReporter
                 // Silently ignore channel failures to prevent error loops
             }
         }
+
+        $this->reportCount++;
 
         return $report;
     }

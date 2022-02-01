@@ -1,11 +1,18 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to `php-exception-reporter` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.0] - 2026-03-22
+
+### Added
+- `withContext()` method for attaching persistent context fields to all exception reports
+- `setFilter()` method for skipping certain exception types from being reported
+- `count()` method for tracking the number of reported exceptions
 
 ## [1.0.3] - 2026-03-20
 
