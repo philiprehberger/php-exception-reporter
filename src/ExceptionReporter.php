@@ -24,6 +24,13 @@ final class ExceptionReporter
 
     private int $reportCount = 0;
 
+    private ?RateLimiter $rateLimiter = null;
+
+    /** @var array<ExceptionReport> */
+    private array $history = [];
+
+    private int $maxHistory = 1000;
+
     /**
      * Add a reporting channel.
      */
@@ -70,6 +77,35 @@ final class ExceptionReporter
     }
 
     /**
+     * Enable rate limiting to prevent flooding during cascading failures.
+     *
+     * @param  int  $maxReports  Maximum reports per fingerprint (and globally) within the window
+     * @param  int  $windowSeconds  Time window in seconds
+     */
+    public function rateLimit(int $maxReports, int $windowSeconds = 60): self
+    {
+        $this->rateLimiter = new RateLimiter($maxReports, $windowSeconds);
+
+        return $this;
+    }
+
+    /**
+     * Return a summary of stored exception reports.
+     */
+    public function summary(): ReportSummary
+    {
+        return new ReportSummary($this->history);
+    }
+
+    /**
+     * Clear the stored report history.
+     */
+    public function clearHistory(): void
+    {
+        $this->history = [];
+    }
+
+    /**
      * Return the number of exceptions reported by this instance.
      */
     public function count(): int
@@ -91,12 +127,17 @@ final class ExceptionReporter
             return $report;
         }
 
+        $fingerprint = $report->fingerprint();
+
         if ($this->deduplication) {
-            $fingerprint = $report->fingerprint();
             if (isset($this->fingerprints[$fingerprint])) {
                 return $report;
             }
             $this->fingerprints[$fingerprint] = true;
+        }
+
+        if ($this->rateLimiter !== null && ! $this->rateLimiter->shouldReport($fingerprint)) {
+            return $report;
         }
 
         foreach ($this->channels as $channel) {
@@ -108,6 +149,10 @@ final class ExceptionReporter
         }
 
         $this->reportCount++;
+
+        if (count($this->history) < $this->maxHistory) {
+            $this->history[] = $report;
+        }
 
         return $report;
     }
