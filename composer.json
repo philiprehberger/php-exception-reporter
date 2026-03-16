@@ -10,6 +10,7 @@
         "logging",
         "webhook"
     ],
+    "homepage": "https://github.com/philiprehberger/php-exception-reporter",
     "authors": [
         {
             "name": "Philip Rehberger"
@@ -38,6 +39,11 @@
     },
     "config": {
         "sort-packages": true
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "lint": "vendor/bin/pint",
+        "analyse": "vendor/bin/phpstan analyse"
     },
     "minimum-stability": "stable"
 }
