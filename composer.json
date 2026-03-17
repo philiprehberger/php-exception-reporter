@@ -13,7 +13,9 @@
     "homepage": "https://github.com/philiprehberger/php-exception-reporter",
     "authors": [
         {
-            "name": "Philip Rehberger"
+            "name": "Philip Rehberger",
+            "email": "me@philiprehberger.com",
+            "role": "Developer"
         }
     ],
     "require": {
@@ -45,5 +47,6 @@
         "lint": "vendor/bin/pint",
         "analyse": "vendor/bin/phpstan analyse"
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
