@@ -8,7 +8,7 @@ Lightweight exception reporting to log channels and webhooks.
 
 ## Requirements
 
-- PHP ^8.2
+- PHP 8.2+
 
 ## Installation
 
