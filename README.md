@@ -82,6 +82,47 @@ $reporter->capture($exception, [
 ]);
 ```
 
+### Persistent context
+
+Attach context fields that are included in every subsequent report. `withContext()` returns a new immutable instance:
+
+```php
+$reporter = $reporter->withContext([
+    'request_id' => 'abc-123',
+    'user_id' => 42,
+]);
+
+// Both reports will include request_id and user_id
+$reporter->capture(new \RuntimeException('first'));
+$reporter->capture(new \LogicException('second'));
+
+// Per-call context is merged with persistent context
+$reporter->capture($exception, ['action' => 'checkout']);
+```
+
+### Filtering exceptions
+
+Skip certain exceptions from being reported using a filter callable:
+
+```php
+$reporter->setFilter(function (\Throwable $e): bool {
+    // Return false to skip reporting
+    return !$e instanceof \DeprecationException;
+});
+
+$reporter->capture(new \DeprecationException('old API')); // Skipped
+$reporter->capture(new \RuntimeException('real error'));   // Reported
+```
+
+### Tracking report count
+
+```php
+$reporter->capture(new \RuntimeException('one'));
+$reporter->capture(new \LogicException('two'));
+
+echo $reporter->count(); // 2
+```
+
 ### Custom channels
 
 Implement the `ReportChannel` interface to build your own channel:
@@ -109,6 +150,9 @@ class SlackChannel implements ReportChannel
 | `enableDeduplication(): self` | Enable fingerprint-based deduplication |
 | `capture(Throwable $e, array $context = []): ExceptionReport` | Capture and report an exception |
 | `resetFingerprints(): void` | Clear deduplication state |
+| `withContext(array $context): self` | Return a new instance with persistent context fields |
+| `setFilter(callable $filter): self` | Set a filter; return `false` to skip reporting |
+| `count(): int` | Number of exceptions reported by this instance |
 
 ### `ExceptionReport`
 
