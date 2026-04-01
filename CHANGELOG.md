@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-04-01
+
+### Added
+- Webhook reporting channel via `WebhookChannel` for sending reports to HTTP endpoints
+- Rate limiting via `rateLimit()` to prevent flooding during cascading failures
+- Aggregated summary reports via `summary()` with top exceptions, counts, and time range
+
 ## [1.1.1] - 2026-03-31
 
 ### Changed

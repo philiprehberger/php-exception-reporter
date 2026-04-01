@@ -114,6 +114,62 @@ $reporter->capture(new \DeprecationException('old API')); // Skipped
 $reporter->capture(new \RuntimeException('real error'));   // Reported
 ```
 
+### Webhook channel
+
+Send exception reports to an HTTP endpoint:
+
+```php
+use PhilipRehberger\ExceptionReporter\Channels\WebhookChannel;
+
+$reporter->addChannel(new WebhookChannel('https://example.com/webhook'));
+
+// With custom headers
+$reporter->addChannel(new WebhookChannel(
+    'https://example.com/webhook',
+    ['Authorization' => 'Bearer secret'],
+));
+
+// With a custom payload transformer
+$reporter->addChannel(new WebhookChannel(
+    'https://example.com/webhook',
+    [],
+    fn ($report) => ['text' => "[{$report->class}] {$report->message}"],
+));
+```
+
+### Rate limiting
+
+Prevent flooding during cascading failures by limiting how many reports are dispatched:
+
+```php
+$reporter->rateLimit(maxReports: 10, windowSeconds: 60);
+
+// Only the first 10 reports per fingerprint (and 10 globally) within 60 seconds are sent
+for ($i = 0; $i < 100; $i++) {
+    $reporter->capture(new \RuntimeException('storm'));
+}
+```
+
+### Summary reports
+
+Access an aggregated summary of captured exceptions:
+
+```php
+$reporter->capture(new \RuntimeException('db timeout'));
+$reporter->capture(new \RuntimeException('db timeout'));
+$reporter->capture(new \LogicException('bad state'));
+
+$summary = $reporter->summary();
+
+$summary->totalCount();    // 3
+$summary->uniqueCount();   // 2
+$summary->since();         // DateTimeImmutable of earliest report
+$summary->until();         // DateTimeImmutable of latest report
+$summary->topExceptions(); // [{message, count, lastSeen}] sorted by frequency
+
+$reporter->clearHistory(); // Reset stored reports
+```
+
 ### Tracking report count
 
 ```php
@@ -153,6 +209,9 @@ class SlackChannel implements ReportChannel
 | `withContext(array $context): self` | Return a new instance with persistent context fields |
 | `setFilter(callable $filter): self` | Set a filter; return `false` to skip reporting |
 | `count(): int` | Number of exceptions reported by this instance |
+| `rateLimit(int $maxReports, int $windowSeconds = 60): self` | Enable rate limiting to cap reports per window |
+| `summary(): ReportSummary` | Return an aggregated summary of stored reports |
+| `clearHistory(): void` | Clear the stored report history |
 
 ### `ExceptionReport`
 
@@ -177,6 +236,24 @@ class SlackChannel implements ReportChannel
 |---|---|
 | `CallbackChannel` | Invokes a user-provided callable |
 | `FileChannel` | Appends JSON-encoded reports to a file |
+| `WebhookChannel` | Sends JSON-encoded reports to an HTTP endpoint via POST |
+
+### `RateLimiter`
+
+| Method | Description |
+|---|---|
+| `__construct(int $maxReports = 100, int $windowSeconds = 60)` | Create a rate limiter with per-fingerprint and global limits |
+| `shouldReport(string $fingerprint): bool` | Check if a report should be allowed within the current window |
+
+### `ReportSummary`
+
+| Method | Description |
+|---|---|
+| `totalCount(): int` | Total number of stored reports |
+| `uniqueCount(): int` | Count of unique exception fingerprints |
+| `topExceptions(int $limit = 5): array` | Top exceptions sorted by frequency with message, count, and lastSeen |
+| `since(): ?DateTimeImmutable` | Earliest report timestamp |
+| `until(): ?DateTimeImmutable` | Latest report timestamp |
 
 ## Development
 
